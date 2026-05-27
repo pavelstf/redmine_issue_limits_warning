@@ -1,0 +1,27 @@
+<% settings = RedmineIssueLimitsWarning::Settings.global %>
+<% issues = local_assigns[:issues] || @issues %>
+<% if RedmineIssueLimitsWarning::Settings.truthy?(settings['show_on_issue_list']) && issues.present? %>
+  <% statuses = issues.each_with_object({}) do |issue, memo| %>
+    <% time_budget = RedmineIssueLimitsWarning::Checks::TimeBudget.call(issue) %>
+    <% due_date = RedmineIssueLimitsWarning::Checks::DueDate.call(issue) %>
+    <% memo[issue.id] = {
+      closed: issue.closed?,
+      time_budget_enabled: time_budget.enabled?,
+      time_budget_status: time_budget.status,
+      time_budget_color: time_budget.color,
+      due_date_overdue: due_date.overdue?,
+      due_date_color: due_date.color
+    } %>
+  <% end %>
+
+  <script>
+    window.RedmineIssueLimitsWarning = window.RedmineIssueLimitsWarning || {};
+    window.RedmineIssueLimitsWarning.issueStatuses = Object.assign(
+      window.RedmineIssueLimitsWarning.issueStatuses || {},
+      <%= raw statuses.to_json %>
+    );
+    if (window.RedmineIssueLimitsWarning.applyIssueListWarnings) {
+      window.RedmineIssueLimitsWarning.applyIssueListWarnings();
+    }
+  </script>
+<% end %>

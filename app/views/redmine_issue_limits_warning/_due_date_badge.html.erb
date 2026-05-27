@@ -1,0 +1,6 @@
+<% due_date_text = respond_to?(:format_date) ? format_date(result.due_date) : result.due_date.to_s %>
+<span class="rilw-badge <%= result.css_class %>" style="--rilw-color: <%= h(result.color) %>">
+  <span class="rilw-badge-label"><%= l(:field_due_date) %></span>
+  <span class="rilw-badge-value"><%= due_date_text %></span>
+  <span class="rilw-badge-note"><%= l(:label_rilw_overdue_by_days, count: result.days_overdue) %></span>
+</span>

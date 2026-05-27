@@ -1,0 +1,96 @@
+.rilw-issue-show {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.rilw-badge {
+  --rilw-color: #777;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border: 1px solid var(--rilw-color);
+  border-left-width: 4px;
+  border-radius: 4px;
+  background: #fff;
+  color: inherit;
+  line-height: 1.4;
+}
+
+.rilw-badge-label {
+  font-weight: 600;
+}
+
+.rilw-badge-note {
+  color: var(--rilw-color);
+  font-weight: 600;
+}
+
+.rilw-project-overview ul {
+  margin-bottom: 0;
+}
+
+.rilw-dot {
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.rilw-dot-ok {
+  background: #16a34a;
+}
+
+.rilw-dot-warning {
+  background: #f59e0b;
+}
+
+.rilw-dot-danger,
+.rilw-dot-overdue {
+  background: #dc2626;
+}
+
+table.list.issues tr.rilw-time-budget-warning td.spent_hours,
+table.list.issues tr.rilw-time-budget-warning td.estimated_hours,
+table.list.issues tr.rilw-time-budget-danger td.spent_hours,
+table.list.issues tr.rilw-time-budget-danger td.estimated_hours,
+table.list.issues tr.rilw-time-budget-exceeded td.spent_hours,
+table.list.issues tr.rilw-time-budget-exceeded td.estimated_hours,
+table.list.issues tr.rilw-due-date-overdue td.due_date {
+  border-left: 4px solid var(--rilw-row-color);
+  font-weight: 600;
+  padding-left: 8px;
+}
+
+table.list.issues tr.rilw-due-date-overdue td.due_date {
+  border-left-color: var(--rilw-due-date-color);
+  color: var(--rilw-due-date-color);
+}
+
+table.list.issues tr.closed td.spent_hours,
+table.list.issues tr.closed td.estimated_hours,
+table.list.issues tr.closed td.due_date {
+  border-left: 0;
+  color: inherit;
+  font-weight: inherit;
+  padding-left: inherit;
+}
+
+.rilw-time-entry-warning {
+  display: none;
+  margin: 8px 0;
+  padding: 8px;
+  border: 1px solid #dc2626;
+  border-left-width: 4px;
+  border-radius: 4px;
+  color: #7f1d1d;
+  background: #fef2f2;
+}
+
+.rilw-time-entry-warning.rilw-visible {
+  display: block;
+}

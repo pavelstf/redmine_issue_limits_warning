@@ -1,0 +1,13 @@
+<% time_entry = local_assigns[:time_entry] || @time_entry %>
+<% issue = time_entry.try(:issue) || @issue %>
+<% if issue && RedmineIssueLimitsWarning::Settings.truthy?(RedmineIssueLimitsWarning::Settings.effective_for(issue.project)['warn_on_time_entry']) %>
+  <% result = RedmineIssueLimitsWarning::Checks::TimeBudget.call(issue) %>
+  <% if result.enabled? %>
+    <div class="rilw-time-entry-warning"
+         data-spent-hours="<%= result.spent_hours %>"
+         data-estimated-hours="<%= result.estimated_hours %>"
+         data-danger-threshold="<%= RedmineIssueLimitsWarning::Settings.threshold(RedmineIssueLimitsWarning::Settings.effective_for(issue.project), 'danger_threshold') %>">
+      <%= l(:notice_rilw_time_entry_will_exceed_estimate) %>
+    </div>
+  <% end %>
+<% end %>

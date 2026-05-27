@@ -1,0 +1,10 @@
+<% issue = local_assigns[:issue] || @issue %>
+<% settings = RedmineIssueLimitsWarning::Settings.effective_for(issue.project) %>
+<% if RedmineIssueLimitsWarning::Settings.truthy?(settings['show_on_issue_show']) %>
+  <% time_budget = RedmineIssueLimitsWarning::Checks::TimeBudget.call(issue) %>
+  <% due_date = RedmineIssueLimitsWarning::Checks::DueDate.call(issue) %>
+  <div class="rilw-issue-show">
+    <%= render partial: 'redmine_issue_limits_warning/time_budget_badge', locals: { issue: issue, result: time_budget } if time_budget.enabled? %>
+    <%= render partial: 'redmine_issue_limits_warning/due_date_badge', locals: { issue: issue, result: due_date } if due_date.enabled? && due_date.overdue? %>
+  </div>
+<% end %>

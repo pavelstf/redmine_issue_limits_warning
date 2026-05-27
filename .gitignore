@@ -1,0 +1,28 @@
+# Local/private Codex context
+master-prompt.md
+REDMINE_HOSTING_CONFIGURATION.md
+GITHUB_PUBLISHING_CONTEXT.md
+Codex Context/
+
+# Release archives
+*.zip
+*.tar.gz
+*.tgz
+
+# Logs and temp files
+log/
+tmp/
+coverage/
+
+# Local dependencies/build artifacts
+.bundle/
+vendor/bundle/
+node_modules/
+dist/
+build/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

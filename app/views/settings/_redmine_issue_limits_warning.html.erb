@@ -1,0 +1,67 @@
+<fieldset>
+  <legend><%= l(:label_rilw_time_budget_settings) %></legend>
+
+  <p>
+    <%= hidden_field_tag 'settings[time_budget_enabled]', '0' %>
+    <label>
+      <%= check_box_tag 'settings[time_budget_enabled]', '1', RedmineIssueLimitsWarning::Settings.truthy?(settings['time_budget_enabled']) %>
+      <%= l(:field_rilw_time_budget_enabled) %>
+    </label>
+  </p>
+
+  <p>
+    <label for="settings_warning_threshold"><%= l(:field_rilw_warning_threshold) %></label>
+    <%= number_field_tag 'settings[warning_threshold]', settings['warning_threshold'], min: 1, max: 999, step: 1 %> %
+  </p>
+
+  <p>
+    <label for="settings_danger_threshold"><%= l(:field_rilw_danger_threshold) %></label>
+    <%= number_field_tag 'settings[danger_threshold]', settings['danger_threshold'], min: 1, max: 999, step: 1 %> %
+  </p>
+
+  <p>
+    <label for="settings_ok_color"><%= l(:field_rilw_ok_color) %></label>
+    <%= color_field_tag 'settings[ok_color]', settings['ok_color'] %>
+  </p>
+
+  <p>
+    <label for="settings_warning_color"><%= l(:field_rilw_warning_color) %></label>
+    <%= color_field_tag 'settings[warning_color]', settings['warning_color'] %>
+  </p>
+
+  <p>
+    <label for="settings_danger_color"><%= l(:field_rilw_danger_color) %></label>
+    <%= color_field_tag 'settings[danger_color]', settings['danger_color'] %>
+  </p>
+</fieldset>
+
+<fieldset>
+  <legend><%= l(:label_rilw_due_date_settings) %></legend>
+
+  <p>
+    <%= hidden_field_tag 'settings[due_date_enabled]', '0' %>
+    <label>
+      <%= check_box_tag 'settings[due_date_enabled]', '1', RedmineIssueLimitsWarning::Settings.truthy?(settings['due_date_enabled']) %>
+      <%= l(:field_rilw_due_date_enabled) %>
+    </label>
+  </p>
+
+  <p>
+    <label for="settings_overdue_color"><%= l(:field_rilw_overdue_color) %></label>
+    <%= color_field_tag 'settings[overdue_color]', settings['overdue_color'] %>
+  </p>
+</fieldset>
+
+<fieldset>
+  <legend><%= l(:label_rilw_display_settings) %></legend>
+
+  <% %w[show_on_issue_show show_on_issue_list show_on_project_overview warn_on_time_entry].each do |key| %>
+    <p>
+      <%= hidden_field_tag "settings[#{key}]", '0' %>
+      <label>
+        <%= check_box_tag "settings[#{key}]", '1', RedmineIssueLimitsWarning::Settings.truthy?(settings[key]) %>
+        <%= l("field_rilw_#{key}".to_sym) %>
+      </label>
+    </p>
+  <% end %>
+</fieldset>
