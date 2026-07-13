@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+
+      - name: Check Ruby syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            ruby -c "$file"
+          done < <(find app lib test -type f -name '*.rb' -print | sort)
+          ruby -c init.rb
+
+      - name: Validate locale YAML and key parity
+        shell: ruby {0}
+        run: |
+          require 'yaml'
+
+          en = YAML.safe_load_file('config/locales/en.yml', aliases: true).fetch('en')
+          bg = YAML.safe_load_file('config/locales/bg.yml', aliases: true).fetch('bg')
+
+          flatten = lambda do |hash, prefix = nil, result = {}|
+            hash.each do |key, value|
+              path = [prefix, key].compact.join('.')
+              value.is_a?(Hash) ? flatten.call(value, path, result) : result[path] = value.to_s
+            end
+            result
+          end
+
+          en_values = flatten.call(en)
+          bg_values = flatten.call(bg)
+          abort 'EN/BG locale keys differ' unless en_values.keys.sort == bg_values.keys.sort
+
+          en_values.each do |key, value|
+            en_tokens = value.scan(/%\{[^}]+\}/).sort
+            bg_tokens = bg_values.fetch(key).scan(/%\{[^}]+\}/).sort
+            abort "Placeholder mismatch for #{key}" unless en_tokens == bg_tokens
+          end
+
+      - name: Verify production archive structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tmp
+          git archive \
+            --format=zip \
+            --prefix=redmine_issue_limits_warning/ \
+            --output=tmp/plugin.zip \
+            HEAD
+          unzip -t tmp/plugin.zip
+          unzip -l tmp/plugin.zip | grep 'redmine_issue_limits_warning/init.rb'
+          unzip -l tmp/plugin.zip | grep 'redmine_issue_limits_warning/assets/stylesheets/redmine_issue_limits_warning.css'
+          unzip -l tmp/plugin.zip | grep 'redmine_issue_limits_warning/assets/javascripts/redmine_issue_limits_warning.js'
+
+  redmine-tests:
+    name: Redmine ${{ matrix.redmine }} / Ruby ${{ matrix.ruby }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - redmine: '5.1-stable'
+            ruby: '3.2'
+          - redmine: '6.1-stable'
+            ruby: '3.2'
+
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@v4
+        with:
+          path: plugin
+
+      - name: Checkout Redmine
+        uses: actions/checkout@v4
+        with:
+          repository: redmine/redmine
+          ref: ${{ matrix.redmine }}
+          path: redmine
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: false
+
+      - name: Install plugin into Redmine
+        shell: bash
+        run: |
+          set -euo pipefail
+          mv plugin redmine/plugins/redmine_issue_limits_warning
+          printf '%s\n' \
+            'test:' \
+            '  adapter: sqlite3' \
+            '  database: db/redmine_test.sqlite3' \
+            > redmine/config/database.yml
+
+      - name: Install dependencies
+        working-directory: redmine
+        run: |
+          bundle config set --local without 'development mysql postgresql rmagick'
+          bundle install --jobs 4 --retry 3
+
+      - name: Prepare test database
+        working-directory: redmine
+        env:
+          RAILS_ENV: test
+        run: |
+          bundle exec rake db:create db:migrate redmine:plugins:migrate
+          bundle exec rake redmine:load_default_data REDMINE_LANG=en
+
+      - name: Run plugin tests
+        working-directory: redmine
+        env:
+          RAILS_ENV: test
+        run: bundle exec rake redmine:plugins:test NAME=redmine_issue_limits_warning
