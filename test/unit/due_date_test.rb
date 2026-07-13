@@ -17,23 +17,21 @@ class RedmineIssueLimitsWarningDueDateTest < ActiveSupport::TestCase
 
   test 'reports overdue days for an open issue' do
     with_settings do
-      User.stub(:current, UserDouble.new(@today)) do
-        result = call_with(@today - 3)
-        assert result.enabled?
-        assert result.overdue?
-        assert_equal 3, result.days_overdue
-        assert_equal '#dc2626', result.color
-      end
+      User.stubs(:current).returns(UserDouble.new(@today))
+      result = call_with(@today - 3)
+      assert result.enabled?
+      assert result.overdue?
+      assert_equal 3, result.days_overdue
+      assert_equal '#dc2626', result.color
     end
   end
 
   test 'does not report an issue due today as overdue' do
     with_settings do
-      User.stub(:current, UserDouble.new(@today)) do
-        result = call_with(@today)
-        assert result.enabled?
-        refute result.overdue?
-      end
+      User.stubs(:current).returns(UserDouble.new(@today))
+      result = call_with(@today)
+      assert result.enabled?
+      refute result.overdue?
     end
   end
 
@@ -51,8 +49,8 @@ class RedmineIssueLimitsWarningDueDateTest < ActiveSupport::TestCase
   end
 
   def with_settings(&block)
-    RedmineIssueLimitsWarning::Settings.stub(:effective_for, @settings) do
-      RedmineIssueLimitsWarning::Settings.stub(:enabled_for?, true, &block)
-    end
+    RedmineIssueLimitsWarning::Settings.stubs(:effective_for).with(@project).returns(@settings)
+    RedmineIssueLimitsWarning::Settings.stubs(:enabled_for?).with(@project).returns(true)
+    block.call
   end
 end

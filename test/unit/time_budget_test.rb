@@ -50,8 +50,8 @@ class RedmineIssueLimitsWarningTimeBudgetTest < ActiveSupport::TestCase
   end
 
   def with_settings(&block)
-    RedmineIssueLimitsWarning::Settings.stub(:effective_for, @settings) do
-      RedmineIssueLimitsWarning::Settings.stub(:enabled_for?, true, &block)
-    end
+    RedmineIssueLimitsWarning::Settings.stubs(:effective_for).with(@project).returns(@settings)
+    RedmineIssueLimitsWarning::Settings.stubs(:enabled_for?).with(@project).returns(true)
+    block.call
   end
 end

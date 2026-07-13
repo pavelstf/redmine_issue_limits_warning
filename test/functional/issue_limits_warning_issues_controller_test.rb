@@ -14,7 +14,7 @@ class IssueLimitsWarningIssuesControllerTest < ActionController::TestCase
   test 'renders a supported filtered issue list' do
     get :index, params: {project_id: @project.identifier, status: 'ok'}
     assert_response :success
-    assert_template :index
+    assert_includes response.body, I18n.t(:label_issue_limits_warning)
   end
 
   test 'returns not found for an unsupported status' do

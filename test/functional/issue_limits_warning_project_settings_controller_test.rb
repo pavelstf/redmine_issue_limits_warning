@@ -15,7 +15,7 @@ class IssueLimitsWarningProjectSettingsControllerTest < ActionController::TestCa
   test 'renders edit for an authorized project member' do
     get :edit, params: {project_id: @project.identifier}
     assert_response :success
-    assert_template :edit
+    assert_includes response.body, 'issue-limits-warning-settings-form'
   end
 
   test 'updates sanitized project settings' do

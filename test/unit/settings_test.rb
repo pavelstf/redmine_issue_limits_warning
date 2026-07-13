@@ -27,12 +27,11 @@ class RedmineIssueLimitsWarningSettingsTest < ActiveSupport::TestCase
       }
     )
 
-    RedmineIssueLimitsWarning::Settings.stub(:global, global) do
-      effective = RedmineIssueLimitsWarning::Settings.effective_for(project)
-      assert_equal '70', effective['warning_threshold']
-      assert_equal '95', effective['danger_threshold']
-      assert_equal '0', effective['due_date_enabled']
-    end
+    RedmineIssueLimitsWarning::Settings.stubs(:global).returns(global)
+    effective = RedmineIssueLimitsWarning::Settings.effective_for(project)
+    assert_equal '70', effective['warning_threshold']
+    assert_equal '95', effective['danger_threshold']
+    assert_equal '0', effective['due_date_enabled']
   end
 
   test 'sanitizes project settings before saving' do
@@ -40,22 +39,22 @@ class RedmineIssueLimitsWarningSettingsTest < ActiveSupport::TestCase
     saved = nil
     defaults = RedmineIssueLimitsWarning::Settings::DEFAULTS.deep_dup
 
-    RedmineIssueLimitsWarning::Settings.stub(:global, defaults) do
-      RedmineIssueLimitsWarning::Settings.stub(:all_project_settings, {}) do
-        Setting.stub(:plugin_redmine_issue_limits_warning=, ->(value) { saved = value }) do
-          RedmineIssueLimitsWarning::Settings.save_project_settings(
-            project,
-            {
-              'enabled' => '1',
-              'override_thresholds' => '1',
-              'warning_threshold' => '80,5',
-              'danger_threshold' => '-10',
-              'due_date_enabled' => '0'
-            }
-          )
-        end
-      end
+    RedmineIssueLimitsWarning::Settings.stubs(:global).returns(defaults)
+    RedmineIssueLimitsWarning::Settings.stubs(:all_project_settings).returns({})
+    Setting.stubs(:plugin_redmine_issue_limits_warning=).with do |value|
+      saved = value
     end
+
+    RedmineIssueLimitsWarning::Settings.save_project_settings(
+      project,
+      {
+        'enabled' => '1',
+        'override_thresholds' => '1',
+        'warning_threshold' => '80,5',
+        'danger_threshold' => '-10',
+        'due_date_enabled' => '0'
+      }
+    )
 
     project_settings = saved.fetch('project_settings').fetch('7')
     assert_equal '1', project_settings['enabled']

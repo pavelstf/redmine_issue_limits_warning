@@ -10,9 +10,8 @@ class RedmineIssueLimitsWarningProjectIssuesFilterTest < ActiveSupport::TestCase
 
   test 'returns a relation with no rows when a status has no matching ids' do
     filter = RedmineIssueLimitsWarning::ProjectIssuesFilter.new(Project.find(1))
-    filter.stub(:issue_ids_for, []) do
-      assert_equal 0, filter.issues_for('ok').count
-    end
+    filter.stubs(:issue_ids_for).with('ok').returns([])
+    assert_equal 0, filter.issues_for('ok').count
   end
 
   test 'defines all supported summary statuses' do
