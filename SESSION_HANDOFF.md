@@ -81,22 +81,27 @@ Not completed locally:
 
 - The full Redmine test suite could not finish on the Windows workstation
   because native Ruby gems required an unavailable MSYS2 build toolchain.
-- The GitHub Actions workflow is intended to provide the authoritative Linux
-  integration result after the branch is pushed.
+- The full suite remains unavailable on the Windows workstation, but GitHub
+  Actions now provides the authoritative Linux integration result.
+
+Passed in GitHub Actions after commit `09a2c9b`:
+
+- static syntax, locale, and archive checks;
+- Redmine `5.1-stable` with Ruby 3.2;
+- Redmine `6.1-stable` with Ruby 3.2.
 
 ## Agreed task status
 
 1. Production deployment and acceptance validation: complete.
-2. Automated test implementation: complete; GitHub CI confirmation pending.
-3. GitHub Actions CI implementation: complete; first run pending.
+2. Automated test implementation: complete and confirmed by GitHub CI.
+3. GitHub Actions CI implementation: complete; Redmine 5.1/6.1 matrix is green.
 
 ## Next actions
 
-1. Inspect the draft PR checks and fix any Redmine 5.1/6.1 test failures.
-2. When CI is green, review and merge the draft PR into `main`.
-3. Continue with the next backlog item: validate that the warning threshold is
+1. Review and merge draft PR #1 into `main`.
+2. Continue with the next backlog item: validate that the warning threshold is
    less than or equal to the danger threshold, with EN/BG administrator feedback.
-4. After that, design role-based server-side blocking of time logging.
+3. After that, design role-based server-side blocking of time logging.
 
 ## Safety notes
 

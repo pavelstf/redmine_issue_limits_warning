@@ -11,13 +11,13 @@ This backlog records the agreed work order for Redmine Issue Limits Warning.
   - Verify English and Bulgarian UI and inspect `log/production.log` for new errors.
   - Record the installed version, package SHA-256, backup filename, and user confirmation in `docs/PRODUCTION_VALIDATION.md`.
   - Production UI and the post-repair log check were accepted on 2026-07-13.
-- [x] Automated tests implemented (CI confirmation pending)
+- [x] Automated tests implemented and confirmed by GitHub CI
   - Unit coverage for time-budget and due-date checks.
   - Settings validation and project override coverage.
   - Project issue filter coverage.
   - Controller permission and update coverage.
   - English/Bulgarian locale key and interpolation parity.
-- [x] GitHub Actions CI implemented (first GitHub run pending)
+- [x] GitHub Actions CI implemented; Redmine 5.1/6.1 matrix is green
   - Ruby syntax and YAML validation.
   - Plugin tests on Redmine 5.1 and 6.1.
   - Production-package structure check.
