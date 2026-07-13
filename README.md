@@ -35,3 +35,15 @@ Project settings are available from the project menu entry "Issue limits" for us
 ## Notes
 
 Version 0.1.0 only visualizes warnings. It does not block time logging. A future version may add role-based blocking when an issue estimate has been exceeded.
+
+## Testing
+
+The plugin test suite is designed to run inside a Redmine checkout:
+
+```text
+RAILS_ENV=test bundle exec rake redmine:plugins:test NAME=redmine_issue_limits_warning
+```
+
+GitHub Actions runs the suite against Redmine 5.1 and 6.1 with Ruby 3.2. It also checks Ruby syntax, locale YAML/key parity, interpolation placeholders, and the production archive structure.
+
+The agreed work order and production acceptance status are tracked in `docs/BACKLOG.md` and `docs/PRODUCTION_VALIDATION.md`.
