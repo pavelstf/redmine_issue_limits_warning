@@ -5,8 +5,8 @@ Redmine::Plugin.register :redmine_issue_limits_warning do
   author 'PAvcho'
   description 'Adds visual warnings when issue spent time approaches estimates or due dates are overdue.'
   version '0.1.0'
-  url 'https://github.com/PAvcho/redmine_issue_limits_warning'
-  author_url 'https://github.com/PAvcho'
+  url 'https://github.com/pavelstf/redmine_issue_limits_warning'
+  author_url 'https://github.com/pavelstf'
 
   requires_redmine version_or_higher: '5.0.0'
 

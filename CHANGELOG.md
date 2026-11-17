@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Count only structural leaf issues in "Without Estimated Time", excluding parents even when their subtasks are closed, hidden, or in another project.
+- Add Redmine 6.1.2 regression tests for missing-estimate filtering, visibility, and summary/list parity.
+- Correct GitHub metadata links and exclude local handoff and SQLite test database files from Git.
+
 ## 0.1.0
 
 - Initial development version.

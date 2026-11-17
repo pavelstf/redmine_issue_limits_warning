@@ -60,7 +60,7 @@ module RedmineIssueLimitsWarning
     end
 
     def leaf_issue?(issue)
-      !Issue.visible.open.where(parent_id: issue.id).exists?
+      issue.leaf?
     end
   end
 end

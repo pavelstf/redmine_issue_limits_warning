@@ -3,6 +3,7 @@ master-prompt.md
 REDMINE_HOSTING_CONFIGURATION.md
 GITHUB_PUBLISHING_CONTEXT.md
 Codex Context/
+HANDOFF.md
 
 # Release archives
 *.zip
@@ -13,6 +14,8 @@ Codex Context/
 log/
 tmp/
 coverage/
+*.sqlite3
+*.sqlite3-*
 
 # Local dependencies/build artifacts
 .bundle/
