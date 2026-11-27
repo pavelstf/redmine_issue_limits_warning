@@ -1,27 +1,60 @@
 <% settings = RedmineIssueLimitsWarning::Settings.global %>
 <% issues = local_assigns[:issues] || @issues %>
 <% if RedmineIssueLimitsWarning::Settings.truthy?(settings['show_on_issue_list']) && issues.present? %>
-  <% statuses = issues.each_with_object({}) do |issue, memo| %>
-    <% time_budget = RedmineIssueLimitsWarning::Checks::TimeBudget.call(issue) %>
-    <% due_date = RedmineIssueLimitsWarning::Checks::DueDate.call(issue) %>
-    <% memo[issue.id] = {
-      closed: issue.closed?,
-      time_budget_enabled: time_budget.enabled?,
-      time_budget_status: time_budget.status,
-      time_budget_color: time_budget.color,
-      due_date_overdue: due_date.overdue?,
-      due_date_color: due_date.color
-    } %>
+  <% statuses = {} %>
+  <% show_ok = RedmineIssueLimitsWarning::Settings.truthy?(settings['show_ok_issue_list_marker']) %>
+  <% evaluations = local_assigns[:evaluations] || RedmineIssueLimitsWarning::Evaluation.call(issues) %>
+  <% budget_rows = evaluations.select do |_id, value|
+       budget = value[:time_budget]
+       budget.enabled? && (budget.warning? || budget.danger? || (show_ok && budget.ok?))
+     end %>
+  <% issues_with_hidden_time = if budget_rows.any?
+       entries = TimeEntry.where(issue_id: budget_rows.keys)
+       entries.where.not(id: entries.visible.select(:id)).distinct.pluck(:issue_id).to_set
+     else
+       Set.new
+     end %>
+  <% evaluations.each do |id, value| %>
+    <% budget = value[:time_budget]; due = value[:due_date] %>
+    <% show_budget = budget_rows.key?(id) %>
+    <% if show_budget %>
+      <% details = [] %>
+      <% if budget.cpi_status != :unknown %>
+        <% details << l(:label_rilw_list_cpi_value, cpi: number_with_precision(budget.cpi, precision: 2)) %>
+      <% end %>
+      <% if budget.reason == :missing_progress %>
+        <% details << l(:label_rilw_list_progress_unavailable) %>
+      <% else %>
+        <% details << l(:label_rilw_list_progress, progress: number_to_percentage(budget.done_ratio, precision: 0)) %>
+      <% end %>
+      <% unless issues_with_hidden_time.include?(id) %>
+        <% details << l(:label_rilw_list_hours,
+          spent: number_with_precision(budget.spent_hours, precision: 2, strip_insignificant_zeros: true),
+          estimate: number_with_precision(budget.estimated_hours, precision: 2, strip_insignificant_zeros: true),
+          consumed: number_to_percentage(budget.ratio, precision: 2, strip_insignificant_zeros: true)) %>
+      <% end %>
+      <% reasons = [] %>
+      <% case budget.cpi_status
+         when :warning, :danger %>
+        <% reasons << l(budget.reason == :no_progress ? :label_rilw_list_no_progress : :label_rilw_list_hours_ahead) %>
+      <% when :ok %>
+        <% reasons << l(:label_rilw_list_cpi_ok) %>
+      <% end %>
+      <% if budget.absolute_limit_reached %>
+        <% threshold = BigDecimal(budget.absolute_limit_threshold.to_s).to_s('F') %>
+        <% reasons << l(:label_rilw_list_limit_reached,
+          limit: number_to_percentage(threshold, precision: nil, strip_insignificant_zeros: true)) %>
+      <% end %>
+      <% title = "#{details.join(' · ')}. #{reasons.join(' ')}" %>
+    <% end %>
+    <% statuses[id] = {closed: value[:closed], time_budget_enabled: show_budget, time_budget_status: budget.status,
+        time_budget_color: budget.color, time_budget_title: (title if show_budget),
+        due_date_overdue: due.overdue?, due_date_color: due.color,
+        due_date_title: (l(:label_rilw_list_overdue) if due.overdue?)} %>
   <% end %>
-
   <script>
     window.RedmineIssueLimitsWarning = window.RedmineIssueLimitsWarning || {};
-    window.RedmineIssueLimitsWarning.issueStatuses = Object.assign(
-      window.RedmineIssueLimitsWarning.issueStatuses || {},
-      <%= raw statuses.to_json %>
-    );
-    if (window.RedmineIssueLimitsWarning.applyIssueListWarnings) {
-      window.RedmineIssueLimitsWarning.applyIssueListWarnings();
-    }
+    window.RedmineIssueLimitsWarning.issueStatuses = Object.assign(window.RedmineIssueLimitsWarning.issueStatuses || {}, <%= raw json_escape(statuses.to_json) %>);
+    if (window.RedmineIssueLimitsWarning.applyIssueListWarnings) window.RedmineIssueLimitsWarning.applyIssueListWarnings();
   </script>
 <% end %>

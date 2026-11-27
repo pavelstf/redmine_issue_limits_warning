@@ -42,18 +42,20 @@
 }
 
 .rilw-dot-ok {
-  background: #16a34a;
+  background: var(--rilw-ok, #16a34a);
 }
 
 .rilw-dot-warning {
-  background: #f59e0b;
+  background: var(--rilw-warning, #f59e0b);
 }
 
-.rilw-dot-danger,
-.rilw-dot-overdue {
-  background: #dc2626;
+.rilw-dot-danger {
+  background: var(--rilw-danger, #dc2626);
 }
+.rilw-dot-overdue { background: var(--rilw-overdue, #dc2626); }
 
+table.list.issues tr.rilw-time-budget-ok td.spent_hours,
+table.list.issues tr.rilw-time-budget-ok td.estimated_hours,
 table.list.issues tr.rilw-time-budget-warning td.spent_hours,
 table.list.issues tr.rilw-time-budget-warning td.estimated_hours,
 table.list.issues tr.rilw-time-budget-danger td.spent_hours,
@@ -71,26 +73,21 @@ table.list.issues tr.rilw-due-date-overdue td.due_date {
   color: var(--rilw-due-date-color);
 }
 
-table.list.issues tr.closed td.spent_hours,
-table.list.issues tr.closed td.estimated_hours,
-table.list.issues tr.closed td.due_date {
-  border-left: 0;
-  color: inherit;
-  font-weight: inherit;
-  padding-left: inherit;
-}
-
 .rilw-time-entry-warning {
   display: none;
   margin: 8px 0;
   padding: 8px;
-  border: 1px solid #dc2626;
+  border: 1px solid var(--rilw-color, #dc2626);
   border-left-width: 4px;
   border-radius: 4px;
-  color: #7f1d1d;
-  background: #fef2f2;
+  color: inherit;
+  background: #fff;
+  background: color-mix(in srgb, var(--rilw-color, #dc2626) 7%, white);
 }
 
 .rilw-time-entry-warning.rilw-visible {
   display: block;
 }
+
+table.rilw-filtered-issues th, table.rilw-filtered-issues td { padding: 6px 8px; }
+table.rilw-filtered-issues th:nth-child(4), table.rilw-filtered-issues td.subject { text-align: left; }

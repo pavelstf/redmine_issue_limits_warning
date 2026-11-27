@@ -16,19 +16,16 @@ Redmine::Plugin.register :redmine_issue_limits_warning do
   )
 
   project_module :issue_limits_warning do
-    permission(
-      :manage_issue_limits_warning,
-      { issue_limits_warning_project_settings: %i[edit update] },
-      require: :member
-    )
+    # Redmine discovers project modules through permissions. This marker grants no actions.
+    permission :issue_limits_warning_module, {}, public: true
   end
-
-  menu(
-    :project_menu,
-    :issue_limits_warning,
-    { controller: 'issue_limits_warning_project_settings', action: 'edit' },
-    caption: :label_issue_limits_warning,
-    after: :settings,
-    param: :project_id
-  )
 end
+
+# Redmine runs plugin initializers inside its own reload preparation callback.
+require_dependency 'projects_helper'
+require_relative 'lib/redmine_issue_limits_warning/projects_helper_patch'
+ProjectsHelper.prepend(RedmineIssueLimitsWarning::ProjectsHelperPatch) unless ProjectsHelper < RedmineIssueLimitsWarning::ProjectsHelperPatch
+
+require_dependency 'settings_controller'
+require_relative 'lib/redmine_issue_limits_warning/settings_controller_patch'
+SettingsController.prepend(RedmineIssueLimitsWarning::SettingsControllerPatch) unless SettingsController < RedmineIssueLimitsWarning::SettingsControllerPatch

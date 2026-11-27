@@ -1,6 +1,7 @@
 class IssueLimitsWarningIssuesController < ApplicationController
   before_action :find_project_by_project_id
   before_action :require_view_issues_permission
+  before_action :require_enabled_module
   before_action :find_status
 
   helper :issues
@@ -13,9 +14,14 @@ class IssueLimitsWarningIssuesController < ApplicationController
     @issue_count = scope.count
     @issue_pages = Paginator.new @issue_count, per_page_option, params[:page]
     @issues = scope.order("#{Issue.table_name}.id DESC").limit(@issue_pages.per_page).offset(@issue_pages.offset).to_a
+    @rilw_evaluations = RedmineIssueLimitsWarning::Evaluation.call(@issues)
   end
 
   private
+
+  def require_enabled_module
+    render_404 unless RedmineIssueLimitsWarning::Settings.enabled_for?(@project)
+  end
 
   def require_view_issues_permission
     render_403 unless User.current.allowed_to?(:view_issues, @project)

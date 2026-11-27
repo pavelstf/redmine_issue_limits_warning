@@ -3,6 +3,7 @@
 <p><%= link_to l(:label_project), project_path(@project) %>: <%= link_to_project(@project) %></p>
 
 <% if @issues.any? %>
+  <div class="autoscroll">
   <table class="list issues odd-even rilw-filtered-issues">
     <thead>
       <tr>
@@ -11,6 +12,8 @@
         <th><%= l(:field_status) %></th>
         <th><%= l(:field_subject) %></th>
         <th><%= l(:field_assigned_to) %></th>
+        <th><%= l(:field_done_ratio) %></th>
+        <th><%= l(:label_rilw_cpi) %></th>
         <th><%= l(:field_estimated_hours) %></th>
         <th><%= l(:label_spent_time) %></th>
         <th><%= l(:field_due_date) %></th>
@@ -24,15 +27,23 @@
           <td class="status"><%= h(issue.status) %></td>
           <td class="subject"><%= link_to_issue issue %></td>
           <td class="assigned_to"><%= h(issue.assigned_to) %></td>
+          <td class="done_ratio"><%= issue.done_ratio %>%</td>
+          <% evaluation = @rilw_evaluations.fetch(issue.id); budget = evaluation.fetch(:time_budget) %>
+          <td class="rilw-cpi">
+            <%= budget.cpi ? format('%.2f', budget.cpi) : l(:label_rilw_unavailable) %>
+            <% if budget.absolute_limit_reached %><span><%= l(:label_rilw_absolute_reached) %></span><% end %>
+          </td>
           <td class="estimated_hours"><%= issue.estimated_hours %></td>
-          <td class="spent_hours"><%= issue.spent_hours %></td>
+          <td class="spent_hours"><%= evaluation.fetch(:spent_hours) %></td>
           <td class="due_date"><%= format_date(issue.due_date) if issue.due_date %></td>
         </tr>
       <% end %>
     </tbody>
   </table>
+  </div>
 
   <span class="pagination"><%= pagination_links_full @issue_pages, @issue_count %></span>
 <% else %>
   <p class="nodata"><%= l(:label_no_data) %></p>
 <% end %>
+<%= render partial: 'redmine_issue_limits_warning/issues_index', locals: {issues: @issues, evaluations: @rilw_evaluations} %>

@@ -2,7 +2,7 @@
 <% settings = RedmineIssueLimitsWarning::Settings.effective_for(project) %>
 <% if RedmineIssueLimitsWarning::Settings.enabled_for?(project) && RedmineIssueLimitsWarning::Settings.truthy?(settings['show_on_project_overview']) %>
   <% counts = RedmineIssueLimitsWarning::ProjectSummary.new(project).counts %>
-  <div class="box rilw-project-overview">
+  <div class="box rilw-project-overview" style="--rilw-ok: <%= h(RedmineIssueLimitsWarning::Settings.color(settings, 'ok_color')) %>; --rilw-warning: <%= h(RedmineIssueLimitsWarning::Settings.color(settings, 'warning_color')) %>; --rilw-danger: <%= h(RedmineIssueLimitsWarning::Settings.color(settings, 'danger_color')) %>; --rilw-overdue: <%= h(RedmineIssueLimitsWarning::Settings.color(settings, 'overdue_color')) %>">
     <h3><%= l(:label_issue_limits_warning) %></h3>
     <ul>
       <li><span class="rilw-dot rilw-dot-ok"></span><%= l(:label_rilw_status_ok) %>: <%= link_to counts[:ok], project_issue_limits_warning_issues_path(project, 'ok') %></li>
@@ -10,6 +10,7 @@
       <li><span class="rilw-dot rilw-dot-danger"></span><%= l(:label_rilw_status_danger) %>: <%= link_to counts[:danger], project_issue_limits_warning_issues_path(project, 'danger') %></li>
       <li><span class="rilw-dot rilw-dot-overdue"></span><%= l(:label_rilw_overdue_open_issues) %>: <%= link_to counts[:overdue], project_issue_limits_warning_issues_path(project, 'overdue') %></li>
       <li><%= l(:label_rilw_without_estimate) %>: <%= link_to counts[:without_estimate], project_issue_limits_warning_issues_path(project, 'without_estimate') %></li>
+      <li><%= l(:label_rilw_status_unknown) %>: <%= link_to counts[:unknown], project_issue_limits_warning_issues_path(project, 'unknown') %></li>
     </ul>
   </div>
 <% end %>

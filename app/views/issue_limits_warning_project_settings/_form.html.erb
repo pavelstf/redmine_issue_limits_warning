@@ -1,0 +1,22 @@
+<% record = @record || RedmineIssueLimitsWarning::Settings.project_settings_record(@project) %>
+<% settings = record.settings_hash %>
+<%= form_tag project_issue_limits_warning_path(@project), method: :put, id: 'issue-limits-warning-settings-form' do %>
+  <%= hidden_field_tag 'issue_limits_warning[lock_version]', record.lock_version %>
+  <%= hidden_field_tag 'issue_limits_warning[new_record]', record.new_record? ? '1' : '0' %>
+  <div class="box tabular">
+    <p class="info"><%= l(:help_rilw_cpi) %></p>
+    <% %w[enabled override_thresholds absolute_limit_enabled due_date_enabled].each do |key| %>
+      <% label_key = key == 'enabled' ? 'project_enabled' : key %>
+      <p><label for="issue_limits_warning_<%= key %>"><%= l("field_rilw_#{label_key}".to_sym) %></label>
+        <%= hidden_field_tag "issue_limits_warning[#{key}]", '0', id: nil %>
+        <%= check_box_tag "issue_limits_warning[#{key}]", '1', RedmineIssueLimitsWarning::Settings.truthy?(settings[key]) %></p>
+    <% end %>
+    <% %w[cpi_warning cpi_danger absolute_limit_threshold].each do |key| %>
+      <p><label for="issue_limits_warning_<%= key %>"><%= l("field_rilw_#{key}".to_sym) %></label>
+        <%= number_field_tag "issue_limits_warning[#{key}]", settings[key], min: 0.0001, max: key == 'absolute_limit_threshold' ? 999 : 1, step: 'any', required: true %></p>
+    <% end %>
+    <p class="info"><%= l(:help_rilw_thresholds) %></p>
+    <p class="info"><%= l(:help_rilw_project_settings) %></p>
+  </div>
+  <%= submit_tag l(:button_save) %>
+<% end %>

@@ -16,10 +16,11 @@ module RedmineIssueLimitsWarning
       end
 
       class << self
-        def call(issue)
-          settings = Settings.effective_for(issue.project)
+        def call(issue, settings: nil, enabled: nil)
+          settings ||= Settings.effective_for(issue.project)
+          enabled = Settings.enabled_for?(issue.project, settings) if enabled.nil?
 
-          return disabled_result unless Settings.enabled_for?(issue.project)
+          return disabled_result unless enabled
           return disabled_result unless Settings.truthy?(settings['due_date_enabled'])
           return disabled_result unless issue.due_date
           return disabled_result if issue.closed?

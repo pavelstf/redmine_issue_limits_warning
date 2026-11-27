@@ -1,20 +1,21 @@
 # Redmine Issue Limits Warning
 
-Redmine plugin that adds visual warnings when an issue approaches or exceeds its estimated time, and when an open issue is past its due date.
+Redmine plugin that visualizes issue labour efficiency (CPI in hours), optional absolute budget limits, and overdue open issues.
 
 ## Features
 
-- Global warning and danger thresholds for `spent_hours / estimated_hours`.
-- Project-level enable/disable and threshold overrides without a database migration.
+- Progress-aware CPI: `estimated_hours × done_ratio / 100 ÷ spent_hours`, with warning below 0.90 and danger below 0.80.
+- Optional independent absolute budget percentage, including limits above 100%.
+- Project-level enable/disable and threshold overrides stored in a dedicated table with optimistic locking.
 - Visual badges on the issue page.
 - Issue list highlighting for spent/estimated hours and overdue due dates.
 - Project overview summary for time budget and overdue issues.
-- Client-side warning while logging time when the new entry reaches or exceeds the estimate threshold.
+- Client-side warning while logging time when the new entry would trigger a CPI warning or reach the configured absolute limit.
 - English and Bulgarian localization.
 
 ## Compatibility
 
-The plugin is designed for Redmine 5.x and 6.x. The initial target environment is Redmine 6.1.x on Ruby 3.2.
+The CPI revision r5 was verified on Redmine 6.1.2 with Ruby 3.2 in production. Local regression tests also ran on Ruby 3.3.
 
 ## Installation
 
@@ -24,29 +25,33 @@ Copy the plugin directory to:
 plugins/redmine_issue_limits_warning
 ```
 
-Then restart Redmine. The first version does not require plugin migrations.
+When upgrading from the original v0.1.0 or another installation with pending plugin migrations, run those migrations before refreshing assets and restarting Redmine. Updating from r4 to r5 reuses the r4 schema and compiled assets. See [CPI, migration, rollback and test instructions](docs/CPI_AND_SETTINGS.md).
+
+See [QA remediation and validation evidence](docs/QA_REMEDIATION.md) for the fixes and acceptance results.
 
 ## Configuration
 
 Global settings are available from Administration -> Plugins -> Redmine Issue Limits Warning -> Configure.
 
-Project settings are available from the project menu entry "Issue limits" for users with the `manage_issue_limits_warning` permission.
+Hover over a marker in the standard or filtered issue list for CPI, completion, logged and estimated hours, and the warning reason. The tooltip includes the absolute threshold when reached. Totals in the tooltip follow Redmine time-entry visibility. Hover over a marked due date for the overdue hint. Green CPI markers are hidden by default and can be enabled in global settings.
+
+When the Issue limits module is enabled, open **Project → Settings → Issue limits**. Administrators and users with Redmine's **Edit project** permission for that project can view and save these settings.
 
 ## Notes
 
 "Without Estimated Time" includes only open, visible issues in the selected project with no positive estimate and no subtasks. Closed or hidden subtasks, including subtasks in other projects, still make an issue a parent. Subproject issues are not included in the selected project's results.
 
-Version 0.1.0 only visualizes warnings. It does not block time logging. A future version may add role-based blocking when an issue estimate has been exceeded.
+Warnings never block time logging. Disabling the project module disables all functionality. CPI applies to structural leaves and uses the standard Redmine Done ratio. Unavailable CPI is not labelled OK. SPI is outside scope.
 
 ## Development tests
 
 The test profile in `.redmine-test.yml` targets Redmine 6.1.2. Tests require a separate Redmine application and its test dependencies; the plugin cannot run independently. The tests use transactional Redmine fixtures and a dedicated test database, never a production database.
 
-With the Codex `redmine-plugin-test-runtime` skill installed, run from the plugin directory in PowerShell:
+Copy or link the plugin into the `plugins` directory of the test checkout. From the Redmine root, with a dedicated test database configured, run:
 
-```powershell
-& "$HOME\.codex\skills\redmine-plugin-test-runtime\scripts\setup_redmine_test_runtime.ps1" -SkipBundleInstall
-& "$HOME\.codex\skills\redmine-plugin-test-runtime\scripts\run_redmine_plugin_tests.ps1"
+```bash
+RAILS_ENV=test ruby bin/rails db:migrate
+RAILS_ENV=test ruby bin/rails redmine:plugins:migrate NAME=redmine_issue_limits_warning
+RAILS_ENV=test ruby bin/rails test plugins/redmine_issue_limits_warning/test
+node --test plugins/redmine_issue_limits_warning/test/javascript/time_entry_test.js
 ```
-
-`-SkipBundleInstall` reuses existing runtime dependencies. For another prepared Redmine checkout, set `REDMINE_ROOT` to its root, link the plugin into its `plugins` directory, and run `ruby bin/rails test plugins/redmine_issue_limits_warning/test/unit/project_issues_filter_test.rb` from that checkout with its test database configured.

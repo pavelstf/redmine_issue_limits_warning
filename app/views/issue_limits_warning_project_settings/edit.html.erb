@@ -1,45 +1,13 @@
-<h2><%= l(:label_issue_limits_warning) %></h2>
+<h2><%= l(:label_settings) %></h2>
 
-<%= form_tag(
-      project_issue_limits_warning_path(@project),
-      method: :put,
-      id: 'issue-limits-warning-settings-form'
-    ) %>
-  <div class="box tabular">
-    <p>
-      <%= hidden_field_tag 'issue_limits_warning[enabled]', '0' %>
-      <label>
-        <%= check_box_tag 'issue_limits_warning[enabled]', '1', RedmineIssueLimitsWarning::Settings.truthy?(@settings.fetch('enabled', '1')) %>
-        <%= l(:field_rilw_project_enabled) %>
-      </label>
-    </p>
+<% tabs = project_settings_tabs.map do |tab|
+     url = settings_project_path(@project, tab: tab[:name])
+     if tab[:name] == 'issue_limits_warning'
+       tab.merge(url: url)
+     else
+       {name: tab[:name], label: tab[:label], url: url}
+     end
+   end %>
+<%= render_tabs tabs, 'issue_limits_warning' %>
 
-    <p>
-      <%= hidden_field_tag 'issue_limits_warning[override_thresholds]', '0' %>
-      <label>
-        <%= check_box_tag 'issue_limits_warning[override_thresholds]', '1', RedmineIssueLimitsWarning::Settings.truthy?(@settings['override_thresholds']) %>
-        <%= l(:field_rilw_override_thresholds) %>
-      </label>
-    </p>
-
-    <p>
-      <label for="issue_limits_warning_warning_threshold"><%= l(:field_rilw_warning_threshold) %></label>
-      <%= number_field_tag 'issue_limits_warning[warning_threshold]', @settings['warning_threshold'], min: 1, max: 999, step: 1 %> %
-    </p>
-
-    <p>
-      <label for="issue_limits_warning_danger_threshold"><%= l(:field_rilw_danger_threshold) %></label>
-      <%= number_field_tag 'issue_limits_warning[danger_threshold]', @settings['danger_threshold'], min: 1, max: 999, step: 1 %> %
-    </p>
-
-    <p>
-      <%= hidden_field_tag 'issue_limits_warning[due_date_enabled]', '0' %>
-      <label>
-        <%= check_box_tag 'issue_limits_warning[due_date_enabled]', '1', RedmineIssueLimitsWarning::Settings.truthy?(@settings.fetch('due_date_enabled', '1')) %>
-        <%= l(:field_rilw_due_date_enabled) %>
-      </label>
-    </p>
-  </div>
-
-  <%= submit_tag l(:button_save) %>
-</form>
+<% html_title(l(:label_settings)) %>

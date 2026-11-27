@@ -4,6 +4,7 @@ class IssueLimitsWarningProjectIssuesFilterTest < ActiveSupport::TestCase
   def setup
     User.current = User.find(1)
     @project = Project.find(1)
+    @project.enable_module!(:issue_limits_warning)
     Setting.plugin_redmine_issue_limits_warning = RedmineIssueLimitsWarning::Settings::DEFAULTS.deep_dup
   end
 
