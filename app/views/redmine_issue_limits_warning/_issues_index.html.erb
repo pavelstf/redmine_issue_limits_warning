@@ -50,7 +50,8 @@
     <% statuses[id] = {closed: value[:closed], time_budget_enabled: show_budget, time_budget_status: budget.status,
         time_budget_color: budget.color, time_budget_title: (title if show_budget),
         due_date_overdue: due.overdue?, due_date_color: due.color,
-        due_date_title: (l(:label_rilw_list_overdue) if due.overdue?)} %>
+        due_date_title: (l(:label_rilw_list_overdue, date: format_date(due.due_date),
+          days: l(:label_rilw_overdue_by_days, count: due.days_overdue)) if due.overdue?)} %>
   <% end %>
   <script>
     window.RedmineIssueLimitsWarning = window.RedmineIssueLimitsWarning || {};

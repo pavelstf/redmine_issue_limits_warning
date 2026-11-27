@@ -31,7 +31,7 @@ en:
   field_rilw_show_on_issue_show: "Show on issue page"
   field_rilw_show_on_issue_list: "Show on issue list"
   field_rilw_show_ok_issue_list_marker: "Show the green marker for normal CPI in issue lists"
-  label_rilw_list_overdue: "Overdue issue"
+  label_rilw_list_overdue: "Planned due date: %{date} · %{days}"
   label_rilw_list_cpi_value: "CPI %{cpi}"
   label_rilw_list_progress: "%{progress} complete"
   label_rilw_list_progress_unavailable: "Completion unavailable"

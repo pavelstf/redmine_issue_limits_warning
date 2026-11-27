@@ -19,28 +19,43 @@ module RedmineIssueLimitsWarning
       matching_issue_ids.fetch(status.to_s)
     end
 
+    def sorted_issue_ids_for(status, column, descending:)
+      values = {}
+      @matching_issue_ids = collect_issue_ids do |issue, budget|
+        values[issue.id] = column == 'cpi' ? budget.cpi : issue.done_ratio
+      end
+
+      issue_ids_for(status).sort_by do |id|
+        value = values[id]
+        [value.nil? ? 1 : 0, descending ? -value.to_f : value.to_f, -id]
+      end
+    end
+
     private
 
     def matching_issue_ids
-      @matching_issue_ids ||= begin
-        ids = STATUSES.to_h { |status| [status, []] }
-        if Settings.enabled_for?(project)
-          base_scope.find_in_batches(batch_size: 500) do |batch|
-            evaluations = Evaluation.call(batch)
-            batch.each do |issue|
-              result = evaluations.fetch(issue.id)
-              budget = result[:time_budget]
-              if issue.leaf? && issue.estimated_hours.to_f <= 0
-                ids['without_estimate'] << issue.id
-              elsif budget.enabled?
-                ids[budget.status.to_s] << issue.id
-              end
-              ids['overdue'] << issue.id if result[:due_date].overdue?
-            end
+      @matching_issue_ids ||= collect_issue_ids
+    end
+
+    def collect_issue_ids
+      ids = STATUSES.to_h { |status| [status, []] }
+      return ids unless Settings.enabled_for?(project)
+
+      base_scope.find_in_batches(batch_size: 500) do |batch|
+        evaluations = Evaluation.call(batch)
+        batch.each do |issue|
+          result = evaluations.fetch(issue.id)
+          budget = result[:time_budget]
+          if issue.leaf? && issue.estimated_hours.to_f <= 0
+            ids['without_estimate'] << issue.id
+          elsif budget.enabled?
+            ids[budget.status.to_s] << issue.id
           end
+          ids['overdue'] << issue.id if result[:due_date].overdue?
+          yield issue, budget if block_given?
         end
-        ids
       end
+      ids
     end
 
     def base_scope

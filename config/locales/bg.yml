@@ -31,7 +31,7 @@ bg:
   field_rilw_show_on_issue_show: "Показване в страницата на задачата"
   field_rilw_show_on_issue_list: "Показване в списъка със задачи"
   field_rilw_show_ok_issue_list_marker: "Показване на зелена лента при нормален CPI в списъците"
-  label_rilw_list_overdue: "Просрочена задача"
+  label_rilw_list_overdue: "Планирана крайна дата: %{date} · %{days}"
   label_rilw_list_cpi_value: "CPI %{cpi}"
   label_rilw_list_progress: "Завършено %{progress}"
   label_rilw_list_progress_unavailable: "Няма данни за завършеност"

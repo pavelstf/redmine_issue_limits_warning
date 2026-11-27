@@ -33,7 +33,7 @@ See [QA remediation and validation evidence](docs/QA_REMEDIATION.md) for the fix
 
 Global settings are available from Administration -> Plugins -> Redmine Issue Limits Warning -> Configure.
 
-Hover over a marker in the standard or filtered issue list for CPI, completion, logged and estimated hours, and the warning reason. The tooltip includes the absolute threshold when reached. Totals in the tooltip follow Redmine time-entry visibility. Hover over a marked due date for the overdue hint. Green CPI markers are hidden by default and can be enabled in global settings.
+Hover over a marker in the standard or filtered issue list for CPI, completion, logged and estimated hours, and the warning reason. The tooltip includes the absolute threshold when reached. Totals in the tooltip follow Redmine time-entry visibility. Hover over a marked due date to see the planned due date and the number of calendar days overdue. Green CPI markers are hidden by default and can be enabled in global settings.
 
 When the Issue limits module is enabled, open **Project → Settings → Issue limits**. Administrators and users with Redmine's **Edit project** permission for that project can view and save these settings.
 

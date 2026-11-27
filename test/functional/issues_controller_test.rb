@@ -63,12 +63,14 @@ class RilwIssuesControllerTest < Redmine::ControllerTest
   end
 
   def test_green_marker_is_optional_and_overdue_hint_is_independent
-    @issue.reload.update_columns(done_ratio: 60, due_date: Date.yesterday)
-    with_settings issue_done_ratio: 'issue_field', default_language: 'bg', force_default_language_for_loggedin: '1' do
+    due_date = User.find(1).today - 3
+    @issue.reload.update_columns(done_ratio: 60, due_date: due_date)
+    title = %Q("due_date_title":"Планирана крайна дата: #{due_date} · просрочена с 3 дни")
+    with_settings issue_done_ratio: 'issue_field', default_language: 'bg', date_format: '%Y-%m-%d', force_default_language_for_loggedin: '1' do
       params = {project_id: @project.id, status: 'overdue'}
       get :index, params: params
       assert_response :success
-      assert_includes response.body, 'Просрочена задача'
+      assert_includes response.body, title
       assert_not_includes response.body, 'Нормална ефективност по часове'
 
       Setting.plugin_redmine_issue_limits_warning = RedmineIssueLimitsWarning::Settings::DEFAULTS.merge(
@@ -76,7 +78,7 @@ class RilwIssuesControllerTest < Redmine::ControllerTest
       get :index, params: params
       assert_response :success
       assert_includes response.body, 'Нормална ефективност по часове'
-      assert_includes response.body, 'Просрочена задача'
+      assert_includes response.body, title
     end
   end
 
@@ -84,6 +86,41 @@ class RilwIssuesControllerTest < Redmine::ControllerTest
     @project.disable_module!(:issue_limits_warning)
     get :index, params: {project_id: 1, status: 'danger'}
     assert_response :not_found
+  end
+
+  def test_filtered_sorting_before_pagination
+    @project.issues.where.not(id: @issue.id).update_all(due_date: nil)
+    @issue.reload.update!(due_date: Date.yesterday)
+    higher_cpi = Issue.create!(project: @project, tracker_id: 1, author_id: 1,
+      subject: 'Higher CPI at lower completion', estimated_hours: 100, done_ratio: 5, due_date: Date.yesterday)
+    entry = @issue.time_entries.first!.dup
+    entry.update!(issue: higher_cpi, hours: 5)
+    unavailable = Issue.create!(project: @project, tracker_id: 1, author_id: 1,
+      subject: 'Unavailable CPI', estimated_hours: 100, done_ratio: 20, due_date: Date.yesterday)
+    params = {project_id: @project.identifier, status: 'overdue', per_page: 1}
+
+    with_settings issue_done_ratio: 'issue_field', per_page_options: '1,25' do
+      get :index, params: params.merge(sort: 'cpi:asc')
+      assert_select 'tr.issue', count: 1 do |rows|
+        assert_equal "issue-#{@issue.id}", rows.first['id'], rows.first.text
+      end
+      assert_select '.pagination a[href*="sort=cpi%3Aasc"]'
+
+      get :index, params: params.merge(sort: 'cpi:desc', page: 2)
+      assert_select "tr#issue-#{@issue.id}"
+      assert_select 'th[aria-sort=descending] a[href*="sort=cpi%3Aasc"]' do |links|
+        assert_not_includes Rack::Utils.parse_query(URI.parse(links.first['href']).query), 'page'
+      end
+
+      get :index, params: params.merge(sort: 'cpi:desc', page: 3)
+      assert_select "tr#issue-#{unavailable.id}"
+
+      get :index, params: params.merge(sort: 'done_ratio:asc')
+      assert_select "tr#issue-#{higher_cpi.id}"
+
+      get :index, params: params.merge(sort: 'done_ratio:desc')
+      assert_select "tr#issue-#{unavailable.id}"
+    end
   end
 
   def test_invalid_status

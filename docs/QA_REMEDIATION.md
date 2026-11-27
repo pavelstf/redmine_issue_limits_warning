@@ -47,3 +47,10 @@ The independent QA report from 2026-11-25 informed the CPI revision. The finding
 - Browser acceptance confirmed the new tooltips in both the standard and filtered issue lists on staging and production. The project settings tab and access checks were accepted in r4.
 - r5 uses the r4 schema and compiled assets. The update and rollback procedures replace only the code. Local fixtures covered rollback after a failed code swap verification.
 - Request-time and memory measurements on large customer projects remain outside this acceptance.
+
+## r8 acceptance, 2026-11-27
+
+- Local Redmine 6.1.2 validation passed 56 Ruby tests with 376 assertions and seven JavaScript tests.
+- GCR staging and production accepted byte-identical r8 ZIPs (63,838 bytes, SHA-256 `8cada35efef5a816470fd4ac600086ca25af7dca9b197d903f6b802db1a68ea2`).
+- Production verification confirmed version 0.1.0, revision r8, migrations 001 and 002, the InnoDB settings table and the same compiled CSS and JavaScript as r5.
+- The user confirmed the overdue tooltip in both issue lists and sorting by CPI and completion in the filtered list on production.

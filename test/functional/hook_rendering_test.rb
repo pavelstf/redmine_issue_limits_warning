@@ -27,16 +27,17 @@ class RilwIssueHookRenderingTest < Redmine::ControllerTest
     assert_select '.rilw-badge', count: 0
   end
 
-  def test_standard_list_explains_cpi_and_keeps_the_overdue_title
-    @issue.reload.update!(estimated_hours: 40, done_ratio: 20, due_date: Date.yesterday)
+  def test_standard_list_explains_cpi_and_shows_one_day_overdue
+    due_date = User.find(1).today - 1
+    @issue.reload.update!(estimated_hours: 40, done_ratio: 20, due_date: due_date)
     @issue.time_entries.first!.update!(hours: 10)
 
-    with_settings issue_done_ratio: 'issue_field', default_language: 'bg', force_default_language_for_loggedin: '1' do
+    with_settings issue_done_ratio: 'issue_field', default_language: 'bg', date_format: '%Y-%m-%d', force_default_language_for_loggedin: '1' do
       get :index, params: {project_id: @project.identifier}
       assert_response :success
       assert_select "tr#issue-#{@issue.id}"
       assert_includes response.body, '"time_budget_title":"CPI 0.80 · Завършено 20% · Отчетени 10 от 40 ч (25% от оценката). За този напредък са отчетени повече часове от очакваното."'
-      assert_includes response.body, '"due_date_title":"Просрочена задача"'
+      assert_includes response.body, %Q("due_date_title":"Планирана крайна дата: #{due_date} · просрочена с 1 ден")
     end
   end
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## CPI revision r8 — 2026-11-27
+
+- Sort the filtered issue list by CPI or completion before pagination. Keep unavailable CPI values last in both directions.
+- Show the planned due date and calendar days overdue in the tooltip in the standard and filtered issue lists.
+
 ## CPI revision r5 — 2026-11-27
 
 - Show completion, logged and estimated hours, and the reason for a CPI warning in both issue lists. When reached, show the configured absolute limit in the tooltip.
